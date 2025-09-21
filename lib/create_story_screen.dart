@@ -1,7 +1,10 @@
 
+import 'dart:convert';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'models/story_category.dart'; // <--- CORRECTED IMPORT PATH
+import 'models/story_category.dart';
 
 class CreateStoryScreen extends StatefulWidget {
   const CreateStoryScreen({super.key});
@@ -12,12 +15,30 @@ class CreateStoryScreen extends StatefulWidget {
 
 class _CreateStoryScreenState extends State<CreateStoryScreen> {
   int _currentStep = 1;
+  final int _totalSteps = 4;
   String? _selectedCategoryId;
+
+  Map<String, dynamic> _prompts = {};
+  Map<String, String> _selectedWords = {};
 
   final _childNameController = TextEditingController();
   final _ageController = TextEditingController();
   final _favoriteAnimalController = TextEditingController();
   final _settingController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrompts();
+  }
+
+  Future<void> _loadPrompts() async {
+    final String response = await rootBundle.loadString('assets/prompts.json');
+    final data = await json.decode(response);
+    setState(() {
+      _prompts = data;
+    });
+  }
 
   @override
   void dispose() {
@@ -35,12 +56,14 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
   }
 
   void _nextStep() {
-    if (_currentStep < 3) {
+    if (_currentStep < _totalSteps) {
+      if (_currentStep == 1 && _selectedCategoryId != null) {
+        _initializeSelectedWords();
+      }
       setState(() {
         _currentStep++;
       });
     } else {
-      // Navigate to result screen
       context.go('/home/story');
     }
   }
@@ -55,44 +78,59 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
     }
   }
 
+  void _initializeSelectedWords() {
+    if (_selectedCategoryId == null || !_prompts.containsKey(_selectedCategoryId)) return;
+
+    final promptData = _prompts[_selectedCategoryId!];
+    final words = promptData['words'] as Map<String, dynamic>;
+    
+    final newSelectedWords = <String, String>{};
+    words.forEach((key, value) {
+      if (value is List && value.isNotEmpty) {
+        newSelectedWords[key] = value.first as String;
+      }
+    });
+
+    setState(() {
+      _selectedWords = newSelectedWords;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 8, 16, 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: _previousStep,
-                  ),
-                  const Text('Create New Story', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ],
+            if (_currentStep != 2)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 8, 16, 8),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: _previousStep,
+                    ),
+                    const Text('Create New Story', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ],
+                ),
               ),
-            ),
-
-            // Step Indicator
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(3, (index) {
-                return Container(
-                  width: 10,
-                  height: 10,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _currentStep > index ? Theme.of(context).primaryColor : Colors.grey[300],
-                  ),
-                );
-              }),
-            ),
-            const SizedBox(height: 24),
-
-            // Step Content
+            if (_currentStep != 2)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(_totalSteps, (index) {
+                  return Container(
+                    width: 10,
+                    height: 10,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentStep > index ? Theme.of(context).primaryColor : Colors.grey[300],
+                    ),
+                  );
+                }),
+              ),
+            if (_currentStep != 2) const SizedBox(height: 24),
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
@@ -102,23 +140,22 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                 child: _buildCurrentStep(),
               ),
             ),
-
-            // Navigation
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton.icon(
-                onPressed: _currentStep == 1 && _selectedCategoryId == null ? null : _nextStep,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.grey[400],
+            if (_currentStep != 2)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton.icon(
+                  onPressed: _currentStep == 1 && _selectedCategoryId == null ? null : _nextStep,
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey[400],
+                  ),
+                  label: Text(_currentStep == _totalSteps ? 'Generate Story' : 'Continue'),
+                  icon: Icon(_currentStep == _totalSteps ? Icons.auto_awesome : Icons.arrow_forward),
                 ),
-                label: Text(_currentStep == 3 ? 'Generate Story' : 'Continue'),
-                icon: Icon(_currentStep == 3 ? Icons.auto_awesome : Icons.arrow_forward),
-              ),
-            )
+              )
           ],
         ),
       ),
@@ -133,6 +170,8 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
         return _buildStep2();
       case 3:
         return _buildStep3();
+      case 4:
+        return _buildStep4();
       default:
         return _buildStep1();
     }
@@ -201,8 +240,147 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
   }
 
   Widget _buildStep2() {
-    return SingleChildScrollView(
+    final selectedCategory = _selectedCategoryId != null
+        ? storyCategories.firstWhere((c) => c.id == _selectedCategoryId)
+        : null;
+
+    if (selectedCategory == null || !_prompts.containsKey(selectedCategory.id)) {
+      return const Center(child: Text('Please select a category first.'));
+    }
+
+    final promptData = _prompts[selectedCategory.id];
+    final String template = promptData['template'];
+    final Map<String, dynamic> wordsOptions = promptData['words'];
+
+    return Stack(
       key: const ValueKey('step2'),
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            gradient: selectedCategory.gradient,
+          ),
+        ),
+        Positioned(
+          top: 16,
+          left: 4,
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: _previousStep,
+          ),
+        ),
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: const TextStyle(fontSize: 28, color: Colors.white, height: 1.5, shadows: [
+                  Shadow(blurRadius: 8.0, color: Colors.black45, offset: Offset(0, 2))
+                ]),
+                children: _buildTappableText(template, wordsOptions),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 16,
+          left: 16,
+          right: 16,
+          child: ElevatedButton.icon(
+            onPressed: _nextStep,
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+            ),
+            label: const Text('Continue'),
+            icon: const Icon(Icons.arrow_forward),
+          ),
+        )
+      ],
+    );
+  }
+
+  List<TextSpan> _buildTappableText(String template, Map<String, dynamic> wordsOptions) {
+    final List<TextSpan> spans = [];
+    final RegExp exp = RegExp(r'\{(\w+)\}');
+
+    template.splitMapJoin(
+      exp,
+      onMatch: (Match m) {
+        final key = m.group(1);
+        if (key != null && _selectedWords.containsKey(key)) {
+          spans.add(
+            TextSpan(
+              text: _selectedWords[key],
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+                decorationStyle: TextDecorationStyle.dotted,
+                decorationColor: Colors.white70,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  _showWordPicker(key, wordsOptions[key] as List);
+                },
+            ),
+          );
+        }
+        return '';
+      },
+      onNonMatch: (String nonMatch) {
+        spans.add(TextSpan(text: nonMatch));
+        return '';
+      },
+    );
+
+    return spans;
+  }
+
+  void _showWordPicker(String key, List<dynamic> options) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
+            alignment: WrapAlignment.center,
+            children: options.map((option) {
+              final isSelected = _selectedWords[key] == option;
+              return ChoiceChip(
+                label: Text(option as String),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() {
+                      _selectedWords[key] = option;
+                    });
+                    Navigator.pop(context);
+                  }
+                },
+                backgroundColor: Colors.grey[200],
+                selectedColor: Theme.of(context).primaryColor,
+                labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                pressElevation: 2,
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStep3() {
+    return SingleChildScrollView(
+      key: const ValueKey('step3'),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,13 +451,13 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
     );
   }
 
-  Widget _buildStep3() {
+  Widget _buildStep4() {
     final selectedCategory = _selectedCategoryId != null
         ? storyCategories.firstWhere((c) => c.id == _selectedCategoryId)
         : null;
 
     return SingleChildScrollView(
-      key: const ValueKey('step3'),
+      key: const ValueKey('step4'),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [

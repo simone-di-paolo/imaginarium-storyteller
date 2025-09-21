@@ -1,0 +1,51 @@
+{
+  "adventure": {
+    "template": "A {adjective1} tale about a {adjective2} hero who discovers a {object} in a hidden cave.",
+    "words": {
+      "adjective1": ["thrilling", "daring", "bold", "mysterious"],
+      "adjective2": ["brave", "clever", "fearless", "curious"],
+      "object": ["treasure map", "glowing crystal", "talking animal", "lost city"]
+    }
+  },
+  "fantasy": {
+    "template": "In a kingdom of {creature}, a {adjective} hero must protect the {weapon} of light from the shadows.",
+    "words": {
+      "creature": ["dragons", "elves", "wizards", "griffins"],
+      "adjective": ["noble", "humble", "powerful", "wise"],
+      "weapon": ["ancient sword", "glowing staff", "magic bow", "crystal heart"]
+    }
+  },
+  "space": {
+    "template": "On a mission to {location}, a {adjective} astronaut discovers a strange {object} from another galaxy.",
+    "words": {
+      "location": ["a new planet", "a distant star", "an asteroid field", "a black hole"],
+      "adjective": ["brave", "resourceful", "lone", "veteran"],
+      "object": ["alien artifact", "sentient plant", "new life-form", "derelict ship"]
+    }
+  },
+    "animals": {
+    "template": "A story about a {adjective1} {animal} who makes an unlikely friend in a {adjective2} {setting}.",
+    "words": {
+      "adjective1": ["playful", "curious", "shy", "brave"],
+      "animal": ["lion cub", "baby elephant", "mischievous monkey", "wise old owl"],
+      "adjective2": ["peaceful", "bustling", "enchanted", "sunny"],
+      "setting": ["jungle", "savannah", "forest", "meadow"]
+    }
+  },
+  "friendship": {
+    "template": "Two {adjective} friends learn a valuable lesson about {lesson} during the annual {event}.",
+    "words": {
+      "adjective": ["unlikely", "loyal", "new", "lifelong"],
+      "lesson": ["sharing", "forgiveness", "teamwork", "honesty"],
+      "event": ["town festival", "school competition", "summer camp", "winter holidays"]
+    }
+  },
+  "mystery": {
+    "template": "A {adjective} detective must solve the case of the missing {object} before {event}.",
+    "words": {
+      "adjective": ["young", "brilliant", "amateur", "famous"],
+      "object": ["diamond necklace", "secret recipe", "valuable painting", "prize-winning pet"],
+      "event": ["the clock strikes midnight", "the full moon rises", "the train leaves", "the ship sails"]
+    }
+  }
+}
