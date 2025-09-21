@@ -1,45 +1,90 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
+# Flutter
+.flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
-/build/
-/coverage/
 
-# Symbolication related
-app.*.symbols
+# Build artifacts
+build/
 
-# Obfuscation related
-app.*.map.json
+# IDE-specific files
+.idea/
+.vscode/
+*.iml
+*.ipr
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Generated files
+lib/generated_plugin_registrant.dart
+
+# Log and temporary files
+.log
+app.*.log
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Local settings
+.metadata
+
+# Dart
+.dart_tool/
+
+# Android
+/android/app/src/main/assets/flutter_assets/
+/android/app/src/main/res/merged/
+/android/app/src/main/res/values/generated.xml
+/android/app/build/
+/android/build/
+/android/.gradle/
+/android/captures/
+/android/gradle.properties
+/android/local.properties
+/android/*.keystore
+/android/key.properties
+
+# iOS
+/ios/Pods/
+/ios/Podfile.lock
+/ios/.symlinks/
+/ios/Flutter/App.framework
+/ios/Flutter/engine.xcconfig
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/flutter_export_environment.sh
+/ios/Flutter/podhelper.rb
+/ios/Flutter/Generated.xcconfig
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-50x50@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-50x50@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small@3x.png
+/ios/Runner/GeneratedPluginRegistrant.h
+/ios/Runner/GeneratedPluginRegistrant.m
+/ios/Runner/Info.plist
+/ios/Runner.xcodeproj/project.xcworkspace/
+/ios/Runner.xcodeproj/xcshareddata/
+/ios/Runner.xcworkspace/contents.xcworkspacedata
+/ios/Runner.xcworkspace/xcshareddata/
+
+# Web
+/web/app.js
+/web/main.dart.js
+/web/main.dart.js.deps
+/web/main.dart.js.map
+/web/main.dart.js.tar.gz
