@@ -26,12 +26,6 @@ final GoRouter router = GoRouter(
               },
               routes: <RouteBase>[
                 GoRoute(
-                  path: 'create',
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const CreateStoryScreen();
-                  },
-                ),
-                GoRoute(
                   path: 'story',
                   builder: (BuildContext context, GoRouterState state) {
                     return const StoryResultScreen();
@@ -82,6 +76,12 @@ final GoRouter router = GoRouter(
           ],
         ),
       ],
+    ),
+    GoRoute(
+      path: '/create-story',
+      builder: (BuildContext context, GoRouterState state) {
+        return const CreateStoryScreen();
+      },
     ),
   ],
 );

@@ -26,6 +26,18 @@ class HomeScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
                 const SizedBox(height: 32),
+                ElevatedButton.icon(
+                  onPressed: () => context.go('/create'),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Create New Story'),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
@@ -33,6 +45,22 @@ class HomeScreen extends StatelessWidget {
                         onPressed: () => context.go('/library'),
                         icon: const Icon(Icons.book_online),
                         label: const Text('My Library'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          // TODO: Implement navigation to discover
+                        },
+                        icon: const Icon(Icons.explore),
+                        label: const Text('Discover'),
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 48),
                           shape: RoundedRectangleBorder(

@@ -8,10 +8,17 @@ class StoryResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Story'),
+        title: const Text('Your Magical Story'),
       ),
       body: const Center(
-        child: Text('This is the story result screen.'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 20),
+            Text('Generating your story...'),
+          ],
+        ),
       ),
     );
   }
