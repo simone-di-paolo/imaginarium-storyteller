@@ -1,16 +1,23 @@
-# myapp
+# Imaginarium Storyteller
 
-A new Flutter project.
+A new Flutter project that brings magical stories to life for your little ones.
 
-## Getting Started
+## About The Project
 
-This project is a starting point for a Flutter application.
+Imaginarium Storyteller is a mobile application designed to generate unique and engaging stories for children. The core idea is to provide a creative yet guided experience where users can craft stories starting from pre-configured prompts. These prompts can be customized by changing a few key words, similar to the background AI generation on a Pixel 8 Pro, ensuring the generated content remains within a safe and appropriate scope.
 
-A few resources to get you started if this is your first Flutter project:
+### Key Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+*   **Customizable Story Generation:** Create stories by customizing pre-built prompts.
+*   **AI-Powered Illustrations:** Each page of the story will be accompanied by a beautiful, AI-generated background image to visually enhance the narrative. Initially, this will explore using services like Banana for image generation, with plans to integrate other models as they become available.
+*   **Monetization & Sustainability:** To cover the costs of generative AI services, the free version of the app will include advertisements during the story creation process.
+*   **Pro Plan:** A premium "Pro" subscription will be available, offering an ad-free experience and the ability to access and manage a library of previously created stories.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Technology Stack
+
+*   **Framework:** Flutter
+*   **Language:** Dart
+
+## Usage & Licensing
+
+This is a proprietary project. Cloning, distributing, or using the source code for other projects is restricted.
