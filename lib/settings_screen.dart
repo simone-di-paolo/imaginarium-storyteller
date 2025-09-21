@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -6,10 +5,9 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: const Center(
-        child: Text('This is the Settings screen.'),
+    return const Scaffold(
+      body: Center(
+        child: Text('Settings Screen'),
       ),
     );
   }

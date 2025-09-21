@@ -1,9 +1,9 @@
-
 import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myapp/l10n/app_localizations.dart';
 import 'models/story_category.dart';
 
 class CreateStoryScreen extends StatefulWidget {
@@ -20,6 +20,8 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
 
   Map<String, dynamic> _prompts = {};
   Map<String, String> _selectedWords = {};
+
+  String? _editingWordKey;
 
   final _childNameController = TextEditingController();
   final _ageController = TextEditingController();
@@ -83,7 +85,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
 
     final promptData = _prompts[_selectedCategoryId!];
     final words = promptData['words'] as Map<String, dynamic>;
-    
+
     final newSelectedWords = <String, String>{};
     words.forEach((key, value) {
       if (value is List && value.isNotEmpty) {
@@ -98,6 +100,8 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -111,7 +115,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                       icon: const Icon(Icons.arrow_back),
                       onPressed: _previousStep,
                     ),
-                    const Text('Create New Story', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(l10n.createNewStory, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -152,7 +156,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: Colors.grey[400],
                   ),
-                  label: Text(_currentStep == _totalSteps ? 'Generate Story' : 'Continue'),
+                  label: Text(_currentStep == _totalSteps ? l10n.generateStoryButton : l10n.continueButton),
                   icon: Icon(_currentStep == _totalSteps ? Icons.auto_awesome : Icons.arrow_forward),
                 ),
               )
@@ -178,14 +182,16 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
   }
 
   Widget _buildStep1() {
+    final l10n = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
       key: const ValueKey('step1'),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          const Text('Choose a Story Category', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          Text(l10n.chooseACategory, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          const Text('What kind of adventure should we create?', style: TextStyle(color: Colors.grey)),
+          Text(l10n.whatKindOfAdventure, style: const TextStyle(color: Colors.grey)),
           const SizedBox(height: 24),
           GridView.builder(
             shrinkWrap: true,
@@ -240,26 +246,46 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
   }
 
   Widget _buildStep2() {
+    final l10n = AppLocalizations.of(context)!;
     final selectedCategory = _selectedCategoryId != null
         ? storyCategories.firstWhere((c) => c.id == _selectedCategoryId)
         : null;
 
     if (selectedCategory == null || !_prompts.containsKey(selectedCategory.id)) {
-      return const Center(child: Text('Please select a category first.'));
+      return Center(child: Text(l10n.pleaseSelectCategory));
     }
 
     final promptData = _prompts[selectedCategory.id];
     final String template = promptData['template'];
     final Map<String, dynamic> wordsOptions = promptData['words'];
+    final bool isEditing = _editingWordKey != null;
 
     return Stack(
       key: const ValueKey('step2'),
       children: [
+        // Background gradient
         Container(
           decoration: BoxDecoration(
             gradient: selectedCategory.gradient,
           ),
         ),
+
+        // Dismiss barrier
+        if (isEditing)
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _editingWordKey = null;
+              });
+            },
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.transparent,
+            ),
+          ),
+
+        // Back button
         Positioned(
           top: 16,
           left: 4,
@@ -268,36 +294,58 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
             onPressed: _previousStep,
           ),
         ),
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                style: const TextStyle(fontSize: 28, color: Colors.white, height: 1.5, shadows: [
-                  Shadow(blurRadius: 8.0, color: Colors.black45, offset: Offset(0, 2))
-                ]),
-                children: _buildTappableText(template, wordsOptions),
+
+        // Main content area
+        Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            // Word picker overlay
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              height: isEditing ? 150 : 0,
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                  color: isEditing ? Colors.black.withOpacity(0.4) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(24)),
+              child: isEditing
+                  ? _buildWordPicker(wordsOptions[_editingWordKey!] as List)
+                  : const SizedBox.shrink(),
+            ),
+            if (isEditing) const SizedBox(height: 16),
+
+            // Prompt text
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: const TextStyle(
+                      fontSize: 26, color: Colors.white, height: 1.5, shadows: [
+                    Shadow(blurRadius: 8.0, color: Colors.black45, offset: Offset(0, 2))
+                  ]),
+                  children: _buildTappableText(template, wordsOptions),
+                ),
               ),
             ),
-          ),
-        ),
-        Positioned(
-          bottom: 16,
-          left: 16,
-          right: 16,
-          child: ElevatedButton.icon(
-            onPressed: _nextStep,
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
+            const SizedBox(height: 32),
+
+            // Continue button
+            ElevatedButton.icon(
+              onPressed: _nextStep,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+              ),
+              label: Text(l10n.continueButton),
+              icon: const Icon(Icons.arrow_forward, size: 20),
             ),
-            label: const Text('Continue'),
-            icon: const Icon(Icons.arrow_forward),
-          ),
-        )
+            const SizedBox(height: 48), // Bottom padding
+          ],
+        ),
       ],
     );
   }
@@ -322,7 +370,9 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
               ),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
-                  _showWordPicker(key, wordsOptions[key] as List);
+                  setState(() {
+                    _editingWordKey = key;
+                  });
                 },
             ),
           );
@@ -338,59 +388,56 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
     return spans;
   }
 
-  void _showWordPicker(String key, List<dynamic> options) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  Widget _buildWordPicker(List<dynamic> options) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(top: 24, left: 16, right: 16, bottom: 16),
+      child: Wrap(
+        spacing: 12.0,
+        runSpacing: 12.0,
+        alignment: WrapAlignment.center,
+        children: options.map((option) {
+          final optionStr = option as String;
+          final isSelected = _selectedWords[_editingWordKey!] == optionStr;
+          return ChoiceChip(
+            label: Text(optionStr),
+            selected: isSelected,
+            onSelected: (selected) {
+              if (selected) {
+                setState(() {
+                  _selectedWords[_editingWordKey!] = optionStr;
+                  _editingWordKey = null;
+                });
+              }
+            },
+            backgroundColor: Colors.white.withOpacity(0.9),
+            selectedColor: Theme.of(context).primaryColor,
+            labelStyle: TextStyle(
+              color: isSelected ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          );
+        }).toList(),
       ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
-            alignment: WrapAlignment.center,
-            children: options.map((option) {
-              final isSelected = _selectedWords[key] == option;
-              return ChoiceChip(
-                label: Text(option as String),
-                selected: isSelected,
-                onSelected: (selected) {
-                  if (selected) {
-                    setState(() {
-                      _selectedWords[key] = option;
-                    });
-                    Navigator.pop(context);
-                  }
-                },
-                backgroundColor: Colors.grey[200],
-                selectedColor: Theme.of(context).primaryColor,
-                labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                pressElevation: 2,
-              );
-            }).toList(),
-          ),
-        );
-      },
     );
   }
 
   Widget _buildStep3() {
+    final l10n = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
       key: const ValueKey('step3'),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Center(
+          Center(
             child: Column(
               children: [
-                Text('Customize Your Story', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                SizedBox(height: 8),
-                Text('Make it personal for your little one', style: TextStyle(color: Colors.grey)),
+                Text(l10n.createYourStory, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text(l10n.makeItPersonal, style: const TextStyle(color: Colors.grey)),
               ],
             ),
           ),
@@ -409,15 +456,15 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                     children: [
                       Icon(Icons.person_outline, color: Theme.of(context).primaryColor),
                       const SizedBox(width: 8),
-                      const Text('Character Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text(l10n.characterDetails, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _buildTextField(controller: _childNameController, label: "Child's Name", hint: "Enter your child's name"),
+                  _buildTextField(controller: _childNameController, label: l10n.childsName, hint: l10n.enterChildsName),
                   const SizedBox(height: 16),
-                  _buildTextField(controller: _ageController, label: "Age", hint: "How old are they?", keyboardType: TextInputType.number),
+                  _buildTextField(controller: _ageController, label: l10n.age, hint: l10n.howOldAreThey, keyboardType: TextInputType.number),
                   const SizedBox(height: 16),
-                  _buildTextField(controller: _favoriteAnimalController, label: "Favorite Animal", hint: "What's their favorite animal?"),
+                  _buildTextField(controller: _favoriteAnimalController, label: l10n.favoriteAnimal, hint: l10n.whatsTheirFavoriteAnimal),
                 ],
               ),
             ),
@@ -437,11 +484,11 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                     children: [
                       Icon(Icons.location_on_outlined, color: Theme.of(context).primaryColor),
                       const SizedBox(width: 8),
-                      const Text('Story Setting', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text(l10n.storySetting, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _buildTextField(controller: _settingController, label: "Where should the story take place?", hint: "e.g., magical forest, space station..."),
+                  _buildTextField(controller: _settingController, label: l10n.whereShouldTheStoryTakePlace, hint: l10n.magicalForest),
                 ],
               ),
             ),
@@ -452,6 +499,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
   }
 
   Widget _buildStep4() {
+    final l10n = AppLocalizations.of(context)!;
     final selectedCategory = _selectedCategoryId != null
         ? storyCategories.firstWhere((c) => c.id == _selectedCategoryId)
         : null;
@@ -461,9 +509,9 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          const Text('Review & Generate', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          Text(l10n.reviewAndGenerate, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          const Text("Here's what your story will include", style: TextStyle(color: Colors.grey)),
+          Text(l10n.storyInclude, style: const TextStyle(color: Colors.grey)),
           const SizedBox(height: 24),
           Card(
             elevation: 1,
@@ -479,21 +527,21 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                     children: [
                       Icon(Icons.auto_awesome, color: Theme.of(context).primaryColor),
                       const SizedBox(width: 8),
-                      const Text('Story Preview', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text(l10n.storyPreview, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   const SizedBox(height: 16),
                   if (selectedCategory != null)
                     _buildReviewRow(
-                      'Category:',
+                      l10n.category,
                       selectedCategory.name,
                     ),
                   if (_childNameController.text.isNotEmpty)
-                    _buildReviewRow('Main Character:', _childNameController.text),
+                    _buildReviewRow(l10n.mainCharacter, _childNameController.text),
                   if (_favoriteAnimalController.text.isNotEmpty)
-                    _buildReviewRow('Companion:', _favoriteAnimalController.text),
+                    _buildReviewRow(l10n.companion, _favoriteAnimalController.text),
                   if (_settingController.text.isNotEmpty)
-                    _buildReviewRow('Setting:', _settingController.text),
+                    _buildReviewRow(l10n.setting, _settingController.text),
                 ],
               ),
             ),
@@ -513,9 +561,9 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('AI Magic Ready!', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple[800])),
+                        Text(l10n.aiMagicReady, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple[800])),
                         const SizedBox(height: 4),
-                        Text("We'll create a unique story with beautiful backgrounds just for you.",
+                        Text(l10n.weWillCreateAUniqueStory,
                             style: TextStyle(color: Colors.purple[600], fontSize: 12)),
                       ],
                     ),
